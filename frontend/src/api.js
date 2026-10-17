@@ -1,5 +1,5 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://opspilot-frontend-qmhv.onrender.com";
+
+const API_BASE_URL = "https://opspilot-api-opbm.onrender.com";
 
 export async function investigateService(service = "payment-api") {
   const response = await fetch(`${API_BASE_URL}/api/investigate`, {
@@ -11,7 +11,8 @@ export async function investigateService(service = "payment-api") {
   });
 
   if (!response.ok) {
-    throw new Error(`Investigation failed (${response.status})`);
+    const message = await response.text();
+    throw new Error(`Investigation failed (${response.status}): ${message}`);
   }
 
   return response.json();
@@ -23,7 +24,8 @@ export async function getServiceMetrics(service = "payment-api") {
   );
 
   if (!response.ok) {
-    throw new Error(`Metrics request failed (${response.status})`);
+    const message = await response.text();
+    throw new Error(`Metrics request failed (${response.status}): ${message}`);
   }
 
   return response.json();
