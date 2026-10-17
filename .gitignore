@@ -1,0 +1,31 @@
+@'
+
+# Additional virtual environments
+.venv*/
+venv*/
+env*/
+
+# Environment-specific files
+.env.*
+!.env.example
+
+# Local databases and generated data artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+
+# Python tooling
+.mypy_cache/
+.ruff_cache/
+'@ | Add-Content .gitignore
+# Local environment secrets
+.env
+.env.*
+!.env.example
+
+!data/logs/payment-api.log
+
+# Python cache files
+__pycache__/
+*.py[cod]

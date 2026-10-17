@@ -1,0 +1,82 @@
+{
+  "service": "payment-api",
+  "metrics": [
+    {
+      "timestamp": "2026-09-15T18:00:00Z",
+      "p50_ms": 405,
+      "p95_ms": 410,
+      "p99_ms": 440,
+      "requests_per_second": 790,
+      "error_rate_percent": 0.2,
+      "cpu_percent": 39,
+      "memory_percent": 54,
+      "database_latency_ms": 380
+    },
+    {
+      "timestamp": "2026-09-15T18:05:00Z",
+      "p50_ms": 408,
+      "p95_ms": 415,
+      "p99_ms": 445,
+      "requests_per_second": 798,
+      "error_rate_percent": 0.2,
+      "cpu_percent": 40,
+      "memory_percent": 54,
+      "database_latency_ms": 390
+    },
+    {
+      "timestamp": "2026-09-15T18:10:00Z",
+      "p50_ms": 412,
+      "p95_ms": 420,
+      "p99_ms": 450,
+      "requests_per_second": 805,
+      "error_rate_percent": 0.2,
+      "cpu_percent": 40,
+      "memory_percent": 55,
+      "database_latency_ms": 400
+    },
+    {
+      "timestamp": "2026-09-15T18:15:00Z",
+      "p50_ms": 415,
+      "p95_ms": 430,
+      "p99_ms": 460,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.3,
+      "cpu_percent": 41,
+      "memory_percent": 55,
+      "database_latency_ms": 420
+    },
+    {
+      "timestamp": "2026-09-15T18:20:00Z",
+      "p50_ms": 520,
+      "p95_ms": 1200,
+      "p99_ms": 1700,
+      "requests_per_second": 825,
+      "error_rate_percent": 0.4,
+      "cpu_percent": 42,
+      "memory_percent": 56,
+      "database_latency_ms": 1100
+    },
+    {
+      "timestamp": "2026-09-15T18:25:00Z",
+      "p50_ms": 1800,
+      "p95_ms": 4500,
+      "p99_ms": 5700,
+      "requests_per_second": 835,
+      "error_rate_percent": 0.8,
+      "cpu_percent": 42,
+      "memory_percent": 57,
+      "database_latency_ms": 3800
+    },
+    {
+      "timestamp": "2026-09-15T18:30:00Z",
+      "p50_ms": 420,
+      "p95_ms": 5800,
+      "p99_ms": 7200,
+      "requests_per_second": 842,
+      "error_rate_percent": 1.2,
+      "cpu_percent": 42,
+      "memory_percent": 58,
+      "database_latency_ms": 4900
+    }
+  ]
+}

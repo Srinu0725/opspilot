@@ -1,0 +1,10 @@
+2026-09-15T18:18:12Z INFO payment-api deployment version=v1.8.3
+2026-09-15T18:19:41Z INFO request endpoint=/payments latency=380ms
+2026-09-15T18:21:44Z WARN database query latency=3200ms query=payment_lookup
+2026-09-15T18:23:18Z WARN database query latency=3700ms query=payment_lookup
+2026-09-15T18:24:01Z WARN database query latency=4100ms query=payment_lookup
+2026-09-15T18:25:42Z WARN database query latency=4500ms query=payment_lookup
+2026-09-15T18:27:33Z ERROR request latency=5800ms endpoint=/payments
+2026-09-15T18:28:14Z WARN database connection duration=4700ms
+2026-09-15T18:29:51Z WARN database connection duration=4900ms
+2026-09-15T18:30:00Z ERROR request timeout endpoint=/payments
