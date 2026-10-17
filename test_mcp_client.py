@@ -1,12 +1,9 @@
-﻿ 
-import asyncio
-
+﻿import asyncio
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
-
-
 async def main():
-    url = "http://127.0.0.1:8002/mcp"
+    # url = "http://127.0.0.1:8002/mcp"
+    url = "https://opspilot-odgn.onrender.com/mcp"
 
     async with streamablehttp_client(url) as (
         read_stream,
@@ -63,9 +60,5 @@ async def main():
                 raise RuntimeError(
                     "Investigation tool returned an error"
                 )
-
-
-
 if __name__ == "__main__":
     asyncio.run(main())
-

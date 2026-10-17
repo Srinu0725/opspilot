@@ -1,5 +1,5 @@
-
-const API_BASE_URL = "https://opspilot-api-opbm.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://opspilot-api-opbm.onrender.com";
 
 export async function investigateService(service = "payment-api") {
   const response = await fetch(`${API_BASE_URL}/api/investigate`, {
