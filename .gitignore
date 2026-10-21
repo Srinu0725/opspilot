@@ -29,3 +29,12 @@ env*/
 # Python cache files
 __pycache__/
 *.py[cod]
+
+# Local backups
+*.bak
+*.backup
+*.sept-backup
+
+# Node dependencies and build output
+node_modules/
+dist/

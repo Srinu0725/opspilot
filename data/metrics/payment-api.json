@@ -2,81 +2,92 @@
   "service": "payment-api",
   "metrics": [
     {
-      "timestamp": "2026-09-15T18:00:00Z",
-      "p50_ms": 405,
-      "p95_ms": 410,
-      "p99_ms": 440,
-      "requests_per_second": 790,
-      "error_rate_percent": 0.2,
-      "cpu_percent": 39,
-      "memory_percent": 54,
-      "database_latency_ms": 380
-    },
-    {
-      "timestamp": "2026-09-15T18:05:00Z",
-      "p50_ms": 408,
-      "p95_ms": 415,
-      "p99_ms": 445,
-      "requests_per_second": 798,
-      "error_rate_percent": 0.2,
-      "cpu_percent": 40,
-      "memory_percent": 54,
-      "database_latency_ms": 390
-    },
-    {
-      "timestamp": "2026-09-15T18:10:00Z",
-      "p50_ms": 412,
-      "p95_ms": 420,
-      "p99_ms": 450,
-      "requests_per_second": 805,
-      "error_rate_percent": 0.2,
-      "cpu_percent": 40,
-      "memory_percent": 55,
-      "database_latency_ms": 400
-    },
-    {
-      "timestamp": "2026-09-15T18:15:00Z",
-      "p50_ms": 415,
-      "p95_ms": 430,
-      "p99_ms": 460,
+      "timestamp": "2026-10-19T14:15:00Z",
+      "p50_ms": 80.1,
+      "p95_ms": 178,
+      "p99_ms": 267.0,
       "requests_per_second": 820,
-      "error_rate_percent": 0.3,
+      "error_rate_percent": 0.07,
+      "cpu_percent": 38,
+      "memory_percent": 51,
+      "database_latency_ms": 88
+    },
+    {
+      "timestamp": "2026-10-19T14:20:00Z",
+      "p50_ms": 83.25,
+      "p95_ms": 185,
+      "p99_ms": 277.5,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.08,
+      "cpu_percent": 38,
+      "memory_percent": 51,
+      "database_latency_ms": 95
+    },
+    {
+      "timestamp": "2026-10-19T14:30:00Z",
+      "p50_ms": 85.5,
+      "p95_ms": 190,
+      "p99_ms": 285.0,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.08,
+      "cpu_percent": 39,
+      "memory_percent": 51,
+      "database_latency_ms": 96
+    },
+    {
+      "timestamp": "2026-10-19T14:35:00Z",
+      "p50_ms": 162.0,
+      "p95_ms": 360,
+      "p99_ms": 540.0,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.12,
+      "cpu_percent": 40,
+      "memory_percent": 52,
+      "database_latency_ms": 240
+    },
+    {
+      "timestamp": "2026-10-19T14:40:00Z",
+      "p50_ms": 333.0,
+      "p95_ms": 740,
+      "p99_ms": 1110.0,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.2,
       "cpu_percent": 41,
-      "memory_percent": 55,
-      "database_latency_ms": 420
+      "memory_percent": 52,
+      "database_latency_ms": 680
     },
     {
-      "timestamp": "2026-09-15T18:20:00Z",
-      "p50_ms": 520,
+      "timestamp": "2026-10-19T14:45:00Z",
+      "p50_ms": 409.5,
+      "p95_ms": 910,
+      "p99_ms": 1365.0,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.25,
+      "cpu_percent": 41,
+      "memory_percent": 53,
+      "database_latency_ms": 910
+    },
+    {
+      "timestamp": "2026-10-19T14:50:00Z",
+      "p50_ms": 540.0,
       "p95_ms": 1200,
-      "p99_ms": 1700,
-      "requests_per_second": 825,
-      "error_rate_percent": 0.4,
+      "p99_ms": 1800.0,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.31,
       "cpu_percent": 42,
-      "memory_percent": 56,
-      "database_latency_ms": 1100
+      "memory_percent": 53,
+      "database_latency_ms": 1000
     },
     {
-      "timestamp": "2026-09-15T18:25:00Z",
-      "p50_ms": 1800,
-      "p95_ms": 4500,
-      "p99_ms": 5700,
-      "requests_per_second": 835,
-      "error_rate_percent": 0.8,
-      "cpu_percent": 42,
-      "memory_percent": 57,
-      "database_latency_ms": 3800
-    },
-    {
-      "timestamp": "2026-09-15T18:30:00Z",
-      "p50_ms": 420,
-      "p95_ms": 5800,
-      "p99_ms": 7200,
-      "requests_per_second": 842,
-      "error_rate_percent": 1.2,
-      "cpu_percent": 42,
-      "memory_percent": 58,
-      "database_latency_ms": 4900
+      "timestamp": "2026-10-19T14:55:00Z",
+      "p50_ms": 657.0,
+      "p95_ms": 1460,
+      "p99_ms": 2190.0,
+      "requests_per_second": 820,
+      "error_rate_percent": 0.64,
+      "cpu_percent": 41,
+      "memory_percent": 53,
+      "database_latency_ms": 1120
     }
   ]
 }

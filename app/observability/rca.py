@@ -32,6 +32,16 @@ class RCAEngine:
             "investigation_summary",
             {},
         )
+        reported_incident_context = investigation.get(
+            "reported_incident_context"
+        )
+
+        reported_incident_text = ""
+
+        if isinstance(reported_incident_context, dict):
+            reported_incident_text = str(
+                reported_incident_context.get("content", "")
+            )[:10000]
 
         anomalies = summary.get(
             "observed_anomalies",
@@ -229,7 +239,50 @@ class RCAEngine:
             (
                 "Inspect database I/O, CPU, and lock contention."
             ),
-        ]
+        ]        
+        # ---------------------------------------------------------
+        # Use uploaded report to guide diagnostic recommendations
+        # These are reported signals, not verified evidence.
+        # ---------------------------------------------------------
+
+        report_text = reported_incident_text.lower()
+
+        reported_signal_checks = {
+            "latency": (
+                ("latency", "slow response", "p95", "p99", "timeout"),
+                "Validate reported latency or timeout symptoms against service metrics.",
+            ),
+            "database": (
+                ("database", "sql", "slow query", "deadlock", "connection pool"),
+                "Check database latency, query performance, and connection-pool metrics.",
+            ),
+            "errors": (
+                ("error", "exception", "5xx", "500", "failed request"),
+                "Correlate reported errors with application logs and error-rate metrics.",
+            ),
+            "deployment": (
+                ("deployment", "deployed", "release", "rollback", "new version"),
+                "Compare the reported incident timeline with recent deployment records.",
+            ),
+            "resources": (
+                ("cpu", "memory", "out of memory", "oom", "disk usage"),
+                "Validate reported resource-pressure symptoms against infrastructure metrics.",
+            ),
+        }
+
+        reported_signals = []
+
+        for signal, (keywords, recommendation) in reported_signal_checks.items():
+            if any(keyword in report_text for keyword in keywords):
+                reported_signals.append({
+                    "signal": signal,
+                    "source": "user_uploaded_report",
+                    "verified": False,
+                })
+
+                if recommendation not in recommendations:
+                    recommendations.append(recommendation)
+
 
         if deployment_query_change:
 
@@ -268,7 +321,6 @@ class RCAEngine:
                     "confidence": confidence,
                 }
             )
-
         # ---------------------------------------------------------
         # Return structured RCA
         # ---------------------------------------------------------
@@ -279,5 +331,14 @@ class RCAEngine:
             "limitations": limitations,
             "missing_evidence": missing_evidence,
             "recommendations": recommendations,
+            "reported_signals": reported_signals,
             "runbook_guidance": runbook_guidance,
+            "reported_incident_context": (
+                {
+                    "source": "user_uploaded_report",
+                    "content": reported_incident_text,
+                }
+                if reported_incident_text
+                else None
+            ),
         }

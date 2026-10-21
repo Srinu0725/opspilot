@@ -1,10 +1,6 @@
-2026-09-15T18:18:12Z INFO payment-api deployment version=v1.8.3
-2026-09-15T18:19:41Z INFO request endpoint=/payments latency=380ms
-2026-09-15T18:21:44Z WARN database query latency=3200ms query=payment_lookup
-2026-09-15T18:23:18Z WARN database query latency=3700ms query=payment_lookup
-2026-09-15T18:24:01Z WARN database query latency=4100ms query=payment_lookup
-2026-09-15T18:25:42Z WARN database query latency=4500ms query=payment_lookup
-2026-09-15T18:27:33Z ERROR request latency=5800ms endpoint=/payments
-2026-09-15T18:28:14Z WARN database connection duration=4700ms
-2026-09-15T18:29:51Z WARN database connection duration=4900ms
-2026-09-15T18:30:00Z ERROR request timeout endpoint=/payments
+2026-10-19T14:34:10Z INFO payment-api deployment version=v2.4.1
+2026-10-19T14:38:22Z WARN request endpoint=/payments latency=740ms
+2026-10-19T14:41:07Z WARN database query latency=680ms query=payment_lookup
+2026-10-19T14:44:36Z WARN database query latency=910ms query=payment_lookup
+2026-10-19T14:48:12Z ERROR payment request timed out request_id=req-10482
+2026-10-19T14:52:49Z WARN database query latency=1340ms query=payment_lookup

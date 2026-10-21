@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { investigateService } from "./api";
+import LandingPage from "./LandingPage";
+import ChatAssistant from "./ChatAssistant";
 
 function formatTime(timestamp) {
   if (!timestamp) return "Time unavailable";
@@ -59,22 +61,35 @@ function getMissingEvidence(result, hypothesis) {
   );
 }
 
-function getRecommendations(result) {
-  return (
-    result?.rca_analysis?.recommendations ??
-    result?.final_report?.recommended_next_steps ??
-    result?.recommended_next_steps ??
-    []
-  );
-}
+
+
 
 function getRunbookItems(result) {
-  const contexts = result?.runbook_context ?? result?.runbook_guidance ?? [];
+  const contexts =
+    result?.rca_analysis?.runbook_guidance ??
+    result?.investigation_summary?.runbook_guidance ??
+    result?.runbook_context ??
+    result?.runbook_guidance ??
+    [];
 
-  return contexts.flatMap((context) =>
-    Array.isArray(context?.results) ? context.results : [context]
-  );
+  return contexts.flatMap((context) => {
+    const items = Array.isArray(context?.results)
+      ? context.results
+      : [context];
+
+    return items.map((item) => {
+      const document = item?.document ?? item;
+
+      return {
+        section: document.section ?? document.title ?? "Runbook section",
+        content: document.content ?? document.text ?? "",
+        source: document.source ?? "",
+        relevance_score: item.relevance_score,
+      };
+    });
+  }).filter((item) => item.content.trim());
 }
+
 
 
 function findMetric(result, ...names) {
@@ -90,46 +105,6 @@ function findMetric(result, ...names) {
 
   return null;
 }
-
-
-// function findMetric(result, ...names) {
-//   const metricAnalysis = result?.metric_analysis?.metrics ?? {};
-//   const metrics = result?.metrics?.metrics ?? [];
-
-//   // Prefer metric-analysis values, which may contain current and baseline.
-//   for (const name of names) {
-//     const entry = Object.entries(metricAnalysis).find(
-//       ([key]) => key.toLowerCase() === name.toLowerCase()
-//     );
-
-//     if (entry) {
-//       const value = entry[1];
-
-//       if (value && typeof value === "object") {
-//         return (
-//           value.current ??
-//           value.current_value ??
-//           value.value ??
-//           value.latest ??
-//           null
-//         );
-//       }
-
-//       return value;
-//     }
-//   }
-
-//   // Fall back to partial name matches in the metrics payload.
-//   const entry = metrics.find((item) => {
-//     const key = String(item.name ?? item.metric ?? item.key ?? "").toLowerCase();
-//     return names.some((name) => key.includes(name.toLowerCase()));
-//   });
-
-//   if (!entry) return null;
-
-//   return entry.value ?? entry.current ?? entry.current_value ?? null;
-// }
-
 
 function displayMetric(metric, suffix = "") {
   if (metric == null) return "—";
@@ -147,50 +122,50 @@ function displayMetric(metric, suffix = "") {
 }
 
 
-function App() {
-  const [service, setService] = useState("payment-api");
+function Dashboard({ initialService, incidentReport, onNewIncident }) {
+  const [service, setService] = useState(initialService || "payment-api");
   const [investigating, setInvestigating] = useState(false);
   const [notice, setNotice] = useState("");
   const [result, setResult] = useState(null);
 
-  async function runInvestigation() {
-    setInvestigating(true);
-    setNotice("");
+  async function runInvestigation(serviceToInvestigate = service) {
+      setInvestigating(true);
+      setNotice("");
+      console.log("Dashboard incident report:", {
+      fileName: incidentReport?.fileName,
+      reportLength: incidentReport?.markdown?.length,
+      service: serviceToInvestigate,
+    });
 
-    try {
-      const data = await investigateService(service);
-      setResult(data);
-      console.log(
-        "Metric details:",
-        JSON.stringify(
-          {
-            p95: data.metric_analysis?.metrics?.p95_ms,
-            p99: data.metric_analysis?.metrics?.p99_ms,
-            databaseLatency:
-              data.metric_analysis?.metrics?.database_latency_ms,
-            cpu: data.metric_analysis?.metrics?.cpu_percent,
-            memory: data.metric_analysis?.metrics?.memory_percent,
-            allMetrics: data.metric_analysis?.metrics,
-          },
-          null,
-          2
-        )
-      );
-      setNotice("Investigation completed successfully.");
-      console.log("Investigation result:", data);
-    } catch (error) {
-      setNotice(`Investigation failed: ${error.message}`);
-    } finally {
-      setInvestigating(false);
+      try {
+        const data = await investigateService(
+          serviceToInvestigate,
+          incidentReport
+        );
+
+        setResult(data);
+        console.log("Investigation result:", data);
+        setNotice("Investigation completed successfully.");
+      } catch (error) {
+        setNotice(`Investigation failed: ${error.message}`);
+      } finally {
+        setInvestigating(false);
+      }
     }
-  }
+
+  const autoRunStarted = useRef(false);
+
+  useEffect(() => {
+    if (!initialService || autoRunStarted.current) return;
+    autoRunStarted.current = true;
+    void runInvestigation(initialService);
+  }, [initialService]);
 
   const hypotheses = getHypotheses(result);
   const primaryHypothesis = hypotheses[0];
   const confidence = getConfidence(primaryHypothesis);
   const evidence = getEvidence(result);
   const missingEvidence = getMissingEvidence(result, primaryHypothesis);
-  const recommendations = getRecommendations(result);
   const runbookItems = getRunbookItems(result);
 
   const apiLatency = findMetric(result, "p95_ms");
@@ -240,6 +215,9 @@ function App() {
             <h2>Incident command center</h2>
           </div>
           <div className="topbar-right">
+            <button className="primary-button" onClick={onNewIncident}>
+              New incident
+            </button>
             <span className="demo-badge">
               {result ? "INVESTIGATION RESULTS" : "AWAITING INVESTIGATION"}
             </span>
@@ -262,56 +240,7 @@ function App() {
               <option value="payment-api">payment-api</option>
             </select>
           </div>
-        </section>
-
-        
-        {/* <section className="stats-grid">
-          <article className="stat-card">
-            <div className="stat-heading">API P95 LATENCY</div>
-            <div className="stat-value">
-              {displayMetric(findMetric(result, "p95_ms"))}
-              {findMetric(result, "p95_ms")?.current != null && (
-                <small> ms</small>
-              )}
-            </div>
-            <div className="stat-foot">From investigation metrics</div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-heading">DATABASE LATENCY</div>
-            <div className="stat-value">
-              {displayMetric(findMetric(result, "database_latency_ms"))}
-              {findMetric(result, "database_latency_ms")?.current != null && (
-                <small> ms</small>
-              )}
-            </div>
-            <div className="stat-foot">From investigation metrics</div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-heading">CPU UTILIZATION</div>
-            <div className="stat-value">
-              {displayMetric(findMetric(result, "cpu_percent"))}
-              {findMetric(result, "cpu_percent")?.current != null && (
-                <small>%</small>
-              )}
-            </div>
-            <div className="stat-foot">From investigation metrics</div>
-          </article>
-
-          <article className="stat-card">
-            <div className="stat-heading">MEMORY UTILIZATION</div>
-            <div className="stat-value">
-              {displayMetric(findMetric(result, "memory_percent"))}
-              {findMetric(result, "memory_percent")?.current != null && (
-                <small>%</small>
-              )}
-            </div>
-            <div className="stat-foot">From investigation metrics</div>
-          </article>
-        </section> */}
-
-        
+        </section>      
         {result && (
           <section className="incident-summary">
             <div className="incident-summary-main">
@@ -343,6 +272,7 @@ function App() {
         <section className="stats-grid">
           {[
             { title: "API P95 LATENCY", key: "p95_ms", unit: "ms" },
+            { title: "API P99 LATENCY", key: "p99_ms", unit: "ms" },
             {
               title: "DATABASE LATENCY",
               key: "database_latency_ms",
@@ -418,7 +348,7 @@ function App() {
           </div>
           <button
             className="primary-button"
-            onClick={runInvestigation}
+            onClick={() => runInvestigation()}
             disabled={investigating}
           >
             {investigating ? "Investigating..." : "Run investigation →"}
@@ -517,7 +447,7 @@ function App() {
 
             {evidence.length ? (
               <div className="timeline">
-                {evidence.slice(0, 12).map((event) => (
+                {evidence.slice(0, 8).map((event) => (
                   <article className="timeline-item" key={event.id}>
                     <div className={`timeline-dot ${
                       /error|critical|timeout/i.test(event.title)
@@ -543,50 +473,29 @@ function App() {
           </section>
 
           <section className="panel runbook-panel">
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">RECOMMENDED ACTIONS</p>
-                <h3>Runbook guidance</h3>
-              </div>
-              <span className="runbook-tag">Retrieved context</span>
-            </div>
+  <div className="panel-header">
+    <div>
+      <p className="eyebrow">INVESTIGATION CONTEXT</p>
+      <h3>Retrieved runbook evidence</h3>
+    </div>
+    <span className="runbook-tag">Read-only</span>
+  </div>
 
-            <p className="panel-description">
-              Recommendations are advisory. Validate the evidence before making production changes.
-            </p>
-
-            {recommendations.length ? (
-              <ol className="runbook-list">
-                {recommendations.slice(0, 8).map((item, index) => (
-                  <li key={index}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    {typeof item === "string"
-                      ? item
-                      : item.description ?? item.recommendation ?? JSON.stringify(item)}
-                  </li>
-                ))}
-              </ol>
-            ) : runbookItems.length ? (
-              <ol className="runbook-list">
-                {runbookItems.slice(0, 8).map((item, index) => (
-                  <li key={index}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <div>
-                      <strong>{item.section ?? item.title ?? "Runbook guidance"}</strong>
-                      <p>{item.content ?? item.text ?? item.query ?? ""}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="panel-description">Runbook guidance will appear after an investigation.</p>
-            )}
-
-            <div className="read-only-note">
-              <span>READ-ONLY MODE</span>
-              <p>OpsPilot recommends actions but does not execute production changes.</p>
-            </div>
-          </section>
+  {runbookItems.length > 0 ? (
+    <div className="runbook-list">
+      {runbookItems.slice(0, 5).map((item, index) => (
+        <article key={`${item.section ?? "section"}-${index}`}>
+          <strong>{item.section ?? item.title ?? "Evidence"}</strong>
+          <p>{item.content ?? item.text ?? ""}</p>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <p className="panel-description">
+      No runbook context was retrieved for this investigation.
+    </p>
+  )}
+</section>
         </div>
 
         <footer className="footer">
@@ -596,6 +505,40 @@ function App() {
       </main>
     </div>
   );
+}
+
+function App() {
+  const [incident, setIncident] = useState(null);
+  const [activeView, setActiveView] = useState("dashboard");
+
+  if (!incident) {
+    return <LandingPage onStartInvestigation={setIncident} />;
+  }
+
+  
+return (
+  <div>
+    <nav style={{ display: "flex", gap: 12, padding: 16 }}>
+      <button onClick={() => setActiveView("dashboard")}>
+        Dashboard
+      </button>
+
+      <button onClick={() => setActiveView("assistant")}>
+        OpsPilot Assistant
+      </button>
+    </nav>
+
+    {activeView === "assistant" ? (
+      <ChatAssistant />
+    ) : (
+      <Dashboard
+        initialService={incident.service || "payment-api"}
+        incidentReport={incident}
+      />
+    )}
+  </div>
+);
+
 }
 
 export default App;

@@ -1,0 +1,129 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+.ops-landing {
+  --ops-bg: #0a0d12;
+  --ops-line: #293544;
+  --ops-text: #f2f5fa;
+  --ops-muted: #98a5b7;
+  --ops-accent: #8df0c6;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 15% 10%, #245b4d40, transparent 38%), var(--ops-bg);
+  color: var(--ops-text);
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+.ops-landing * { box-sizing: border-box; }
+.ops-topbar {
+  height: 76px; padding: 0 clamp(20px, 6vw, 88px);
+  border-bottom: 1px solid #97a9be24;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ops-brand {
+  display: flex; align-items: center; gap: 11px; color: var(--ops-text);
+  text-decoration: none; font: 800 20px Manrope, sans-serif;
+}
+.ops-brand-mark {
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border-radius: 10px; background: var(--ops-accent); color: #0b1714;
+}
+.ops-topbar-label, .ops-step-label, .ops-eyebrow {
+  font: 11px "DM Mono", monospace; letter-spacing: 1.4px; color: var(--ops-accent);
+}
+.ops-hero {
+  width: min(1160px, calc(100% - 40px)); margin: auto; padding: 76px 0 88px;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 470px);
+  gap: clamp(38px, 7vw, 100px); align-items: start;
+}
+.ops-hero-copy { padding-top: 38px; }
+.ops-eyebrow { display: flex; align-items: center; gap: 10px; }
+.ops-status-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--ops-accent);
+  box-shadow: 0 0 15px #8df0c6a6;
+}
+.ops-hero h1 {
+  max-width: 620px; margin: 23px 0; font: 700 clamp(39px, 5vw, 64px)/1.08 Manrope, sans-serif;
+  letter-spacing: -2.8px;
+}
+.ops-hero h1 em { color: var(--ops-accent); font-style: normal; }
+.ops-hero-description { max-width: 510px; color: #a7b2c2; font-size: 16px; line-height: 1.8; }
+.ops-trust-row { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 34px; color: #c0cad6; font-size: 12px; }
+.ops-trust-row span:before {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 8px 1px 0;
+  border-radius: 50%; background: var(--ops-accent);
+}
+.ops-intake-card {
+  padding: 25px; border: 1px solid #2a3544; border-radius: 18px;
+  background: linear-gradient(145deg, #151c26fa, #0d1219fa); box-shadow: 0 28px 90px #0003;
+}
+.ops-intake-card h2 { margin: 10px 0 7px; font: 700 23px Manrope, sans-serif; }
+.ops-muted { margin: 0 0 22px; color: var(--ops-muted); font-size: 13px; line-height: 1.6; }
+.ops-dropzone {
+  width: 100%; min-height: 190px; padding: 22px; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; gap: 9px; border: 1px dashed #465667;
+  border-radius: 12px; background: #080c1273; color: var(--ops-text); cursor: pointer; font: inherit;
+}
+.ops-dropzone:hover, .ops-dropzone.is-dragging { border-color: var(--ops-accent); background: #8df0c60e; }
+.ops-upload-icon {
+  display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid #354457;
+  border-radius: 10px; color: var(--ops-accent); font-size: 22px;
+}
+.ops-dropzone strong { font-size: 13px; }
+.ops-dropzone span:not(.ops-upload-icon) { color: #a5b1c0; font-size: 12px; }
+.ops-dropzone u { color: var(--ops-accent); }
+.ops-dropzone small { color: #748296; font: 10px "DM Mono", monospace; }
+.ops-hidden-input { display: none; }
+.ops-required-note { color: var(--ops-muted); font-size: 11px; line-height: 1.7; margin: 16px 0 0; }
+.ops-error { color: #ff9d9d; font-size: 12px; }
+.ops-preview { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--ops-line); }
+.ops-preview-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ops-preview-title strong, .ops-preview-title small { display: block; overflow-wrap: anywhere; }
+.ops-preview-title strong { font-size: 12px; }
+.ops-preview-title small { color: #8492a5; font-size: 10px; margin-top: 4px; }
+.ops-text-button {
+  color: #aab7c7; background: none; border: 0; font: inherit; font-size: 11px;
+  text-decoration: underline; cursor: pointer;
+}
+.ops-preview label { display: block; margin: 15px 0 7px; color: #b4c0ce; font-size: 11px; font-weight: 600; }
+.ops-service-input {
+  width: 100%; border: 1px solid #344253; border-radius: 8px; padding: 11px 12px;
+  background: #0b1017; color: var(--ops-text); font: 13px "DM Mono", monospace; outline: none;
+}
+.ops-service-input:focus { border-color: var(--ops-accent); }
+.ops-markdown-preview {
+  max-height: 185px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  border: 1px solid #293544; border-radius: 8px; padding: 12px; margin: 0;
+  background: #0a0e14; color: #aebccc; font: 11px/1.65 "DM Mono", monospace;
+}
+.ops-primary-button {
+  display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 16px;
+  padding: 13px 15px; border: 0; border-radius: 8px; background: var(--ops-accent);
+  color: #0a1914; cursor: pointer; font: 700 13px Manrope, sans-serif;
+}
+.ops-primary-button span { font-size: 18px; }
+.ops-disclaimer { margin: 12px 0 0; color: #8492a5; font-size: 10px; line-height: 1.6; }
+.ops-how-section { border-top: 1px solid #97a9be24; padding: 54px max(20px, calc((100% - 1160px) / 2)) 70px; }
+.ops-how-section h2 { margin: 10px 0 29px; font: 600 clamp(22px, 3vw, 30px) Manrope, sans-serif; letter-spacing: -.9px; }
+.ops-workflow-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+.ops-workflow-grid article { padding: 22px; border: 1px solid #26313f; border-radius: 12px; background: #11161ea6; }
+.ops-workflow-grid article > span { color: var(--ops-accent); font: 11px "DM Mono", monospace; }
+.ops-workflow-grid h3 { margin: 15px 0 8px; font: 600 15px Manrope, sans-serif; }
+.ops-workflow-grid p { margin: 0; color: var(--ops-muted); font-size: 12px; line-height: 1.7; }
+.ops-footer {
+  display: flex; justify-content: space-between; gap: 16px; padding: 22px clamp(20px, 6vw, 88px);
+  border-top: 1px solid #97a9be24; color: #7e8b9d; font-size: 11px;
+}
+@media (max-width: 900px) {
+  .ops-hero { grid-template-columns: 1fr; max-width: 640px; padding-top: 45px; gap: 36px; }
+  .ops-hero-copy { padding-top: 0; }
+}
+@media (max-width: 600px) {
+  .ops-topbar { height: 64px; padding: 0 20px; }
+  .ops-topbar-label { font-size: 9px; }
+  .ops-hero { width: calc(100% - 28px); padding: 36px 0 52px; }
+  .ops-hero h1 { font-size: 39px; letter-spacing: -1.7px; }
+  .ops-hero-description { font-size: 14px; }
+  .ops-intake-card { padding: 18px; }
+  .ops-trust-row { flex-direction: column; gap: 10px; }
+  .ops-workflow-grid { grid-template-columns: 1fr; }
+  .ops-how-section { padding-top: 38px; padding-bottom: 45px; }
+  .ops-footer { flex-direction: column; }
+}

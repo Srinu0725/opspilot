@@ -219,41 +219,55 @@ class InvestigationSummaryBuilder:
     def _extract_runbook_guidance(
         runbook_context: list[dict],
     ) -> list[dict]:
+        # Keep one entry per source + section.
+        # When duplicates occur, retain the result with the
+        # highest relevance score.
 
-        guidance = []
+        best_by_section = {}
 
         for context in runbook_context:
+            query = context.get("query")
 
-            query = context.get(
-                "query"
-            )
+            for result in context.get("results", []):
+                document = result.get("document", {})
 
-            for result in context.get(
-                "results",
-                [],
-            ):
+                source = document.get("source") or ""
+                section = document.get("section") or ""
+                content = document.get("content") or ""
 
-                document = result.get(
-                    "document",
-                    {},
+                key = (
+                    source.strip().casefold(),
+                    section.strip().casefold(),
                 )
 
-                guidance.append(
-                    {
-                        "query": query,
-                        "section": document.get(
-                            "section"
-                        ),
-                        "content": document.get(
-                            "content"
-                        ),
-                        "relevance_score": result.get(
-                            "relevance_score"
-                        ),
-                        "source": document.get(
-                            "source"
-                        ),
-                    }
-                )
+                guidance_item = {
+                    "query": query,
+                    "section": section,
+                    "content": content,
+                    "relevance_score": result.get(
+                        "relevance_score", 0
+                    ),
+                    "source": source,
+                }
 
-        return guidance
+                existing = best_by_section.get(key)
+
+                if existing is None:
+                    best_by_section[key] = guidance_item
+                    continue
+
+                existing_score = existing.get(
+                    "relevance_score"
+                ) or 0
+                new_score = guidance_item.get(
+                    "relevance_score"
+                ) or 0
+
+                if new_score > existing_score:
+                    best_by_section[key] = guidance_item
+
+        return sorted(
+            best_by_section.values(),
+            key=lambda item: item.get("relevance_score") or 0,
+            reverse=True,
+        )

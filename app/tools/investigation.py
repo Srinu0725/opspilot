@@ -2,7 +2,6 @@ from app.observability.investigator import (
     IncidentInvestigator,
 )
 
-
 investigator = IncidentInvestigator()
 
 
@@ -10,23 +9,20 @@ def investigate_incident(
     service: str,
     start_time: str | None = None,
     end_time: str | None = None,
+    incident_report: str | None = None,
 ) -> dict:
     """
-    Run a structured incident investigation.
+    Run a structured, read-only incident investigation.
 
-    This tool collects metrics, analyzes historical behavior,
-    searches relevant logs, retrieves deployment information,
-    builds a chronological timeline, and structures evidence
-    for downstream reasoning.
-
-    The investigation is read-only.
+    The optional incident report provides user-reported context.
+    It is not treated as verified operational evidence.
     """
-
     print(
         f"[TOOL] investigate_incident("
         f"service={service}, "
         f"start_time={start_time!r}, "
-        f"end_time={end_time!r}"
+        f"end_time={end_time!r}, "
+        f"report_provided={bool(incident_report and incident_report.strip())}"
         f")"
     )
 
@@ -34,4 +30,5 @@ def investigate_incident(
         service=service,
         start_time=start_time,
         end_time=end_time,
+        incident_report=incident_report,
     )

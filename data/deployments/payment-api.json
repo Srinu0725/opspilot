@@ -1,12 +1,13 @@
 {
   "service": "payment-api",
-  "deployment_id": "deploy-2026-09-15-001",
-  "version": "v1.8.3",
-  "previous_version": "v1.8.2",
-  "deployed_at": "2026-09-15T18:15:00Z",
+  "deployment_id": "deploy-2026-10-19-004",
+  "version": "v2.4.1",
+  "previous_version": "v2.4.0",
+  "deployed_at": "2026-10-19T14:34:10Z",
   "status": "successful",
   "changes": [
-    "Updated payment lookup query",
-    "Added transaction metadata filtering"
+    "Updated payment lookup query filtering",
+    "Added transaction status validation",
+    "Modified payment metadata retrieval"
   ]
 }

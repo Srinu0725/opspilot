@@ -1,12 +1,23 @@
 from datetime import datetime
+from pathlib import Path
 from typing import Any
+from datetime import datetime, timezone
+from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import (
+    APIRouter,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 from pydantic import BaseModel, Field
 
 from app.events.models import IncidentEvent
 from app.events.service import event_queue
 from app.incidents.service import incident_store
+from app.tools.investigation import investigate_incident
+# from app.observability.investigator import investigate_incident
 
 
 router = APIRouter(
@@ -59,6 +70,21 @@ class CreateIncidentRequest(BaseModel):
 
 
 # =========================================================
+# Constants
+# =========================================================
+
+
+MAX_REPORT_SIZE = 1_000_000
+
+ALLOWED_REPORT_EXTENSIONS = {
+    ".txt",
+    ".md",
+    ".csv",
+    ".log",
+}
+
+
+# =========================================================
 # Helpers
 # =========================================================
 
@@ -84,6 +110,171 @@ def parse_datetime(
             status_code=400,
             detail=f"Invalid datetime format: {value}",
         ) from exc
+
+
+async def read_incident_report(
+    file: UploadFile,
+) -> str:
+    """
+    Read and validate an uploaded text-based incident report.
+
+    The file is processed in memory and is not saved to disk.
+    """
+
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="A report file is required.",
+        )
+
+    extension = Path(file.filename).suffix.lower()
+
+    if extension not in ALLOWED_REPORT_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Unsupported report format. "
+                "Upload a .txt, .md, .csv, or .log file."
+            ),
+        )
+
+    # Read at most MAX_REPORT_SIZE + 1 bytes so that an oversized
+    # upload can be rejected without reading the entire file.
+    raw_content = await file.read(
+        MAX_REPORT_SIZE + 1
+    )
+
+    if len(raw_content) > MAX_REPORT_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="Report must not exceed 1 MB.",
+        )
+
+    try:
+        report_text = raw_content.decode("utf-8-sig").strip()
+    except UnicodeDecodeError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Report must be UTF-8 encoded text.",
+        ) from exc
+
+    if not report_text:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded report is empty.",
+        )
+
+    return report_text
+
+
+# =========================================================
+# Investigate Incident From Uploaded File
+# =========================================================
+
+@router.post("/investigate")
+async def investigate_uploaded_report(
+    service: str = Form(
+        ...,
+        min_length=1,
+        description="Affected service name, e.g. payment-api.",
+    ),
+    file: UploadFile = File(
+        ...,
+        description="Incident report in TXT, MD, CSV, or LOG format.",
+    ),
+):
+    """Investigate an uploaded report and persist its lifecycle."""
+
+    incident_id = str(uuid4())
+    now = datetime.now(timezone.utc)
+
+    try:
+        report_text = await read_incident_report(file)
+
+        # 1. Persist the initial incident.
+        await incident_store.create_incident(
+            incident_id=incident_id,
+            service=service.strip(),
+            status="CREATED",
+            stage="CREATED",
+            severity="unknown",
+            description=f"Investigation from uploaded report: {file.filename}",
+            start_time=None,
+            end_time=None,
+            created_at=now,
+            metadata={
+                "source": "user_uploaded_report",
+                "file_name": file.filename,
+                "report_length": len(report_text),
+            },
+        )
+
+        # 2. Mark the investigation as running.
+        await incident_store.start_investigation(incident_id)
+
+        # 3. Run the existing investigation.
+        result = investigate_incident(
+            service=service.strip(),
+            incident_report=report_text,
+        )
+
+        result["incident_id"] = incident_id
+        result["incident_report"] = {
+            "file_name": file.filename,
+            "report_received": True,
+            "report_length": len(report_text),
+            "source": "user_uploaded_report",
+            "verified": False,
+        }
+
+        # 4. Persist the final report.
+        saved = await incident_store.set_report(
+            incident_id=incident_id,
+            report=result,
+        )
+
+        if saved is None:
+            raise RuntimeError(
+                f"Incident {incident_id} disappeared before report persistence."
+            )
+
+        return result
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).exception(
+            "Uploaded incident investigation failed; incident_id=%s",
+            incident_id,
+        )
+
+        # Mark the record as failed if it was created successfully.
+        try:
+            existing = await incident_store.get_incident(incident_id)
+            if existing is not None:
+                await incident_store.set_error(
+                    incident_id=incident_id,
+                    error=str(exc)[:2000],
+                )
+        except Exception:
+            logging.getLogger(__name__).exception(
+                "Failed to persist investigation failure; incident_id=%s",
+                incident_id,
+            )
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Investigation failed. Check server logs.",
+                "incident_id": incident_id,
+            },
+        ) from exc
+
+    finally:
+        await file.close()
 
 
 # =========================================================
@@ -114,10 +305,7 @@ async def create_incident(
         Background Worker
     """
 
-    # -----------------------------------------------------
-    # Create incident event
-    # -----------------------------------------------------
-
+    # Create incident event.
     event = IncidentEvent.create(
         service=request.service,
         description=request.description,
@@ -127,10 +315,7 @@ async def create_incident(
         metadata=request.metadata,
     )
 
-    # -----------------------------------------------------
-    # Parse timestamps for PostgreSQL
-    # -----------------------------------------------------
-
+    # Parse timestamps for PostgreSQL.
     start_time = parse_datetime(
         event.start_time
     )
@@ -139,10 +324,7 @@ async def create_incident(
         event.end_time
     )
 
-    # -----------------------------------------------------
-    # Persist initial incident state
-    # -----------------------------------------------------
-
+    # Persist initial incident state.
     incident = await incident_store.create_incident(
         incident_id=event.event_id,
         service=event.service,
@@ -156,18 +338,12 @@ async def create_incident(
         metadata=event.metadata,
     )
 
-    # -----------------------------------------------------
-    # Publish event to queue
-    # -----------------------------------------------------
-
+    # Publish event to queue.
     await event_queue.publish(
         event.to_dict()
     )
 
-    # -----------------------------------------------------
-    # Return immediately
-    # -----------------------------------------------------
-
+    # Return immediately.
     return {
         "incident_id": incident.incident_id,
         "status": incident.status,
