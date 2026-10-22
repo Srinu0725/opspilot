@@ -6,14 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from fastapi import (
-    FastAPI,
-    File,
-    Form,
-    HTTPException,
-    UploadFile,
-)
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from google import genai
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
@@ -54,31 +47,10 @@ ALLOWED_REPORT_EXTENSIONS = {
 
 
 # ---------------------------------------------------------
-# FastAPI Application
+# API Router
 # ---------------------------------------------------------
 
-app = FastAPI(
-    title="OpsPilot API",
-    version="1.1.0",
-)
-
-
-# ---------------------------------------------------------
-# CORS
-# ---------------------------------------------------------
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "https://opspilot-frontend-qmhv.onrender.com",
-    ],
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type"],
-)
+router = APIRouter()
 
 
 # ---------------------------------------------------------
@@ -124,22 +96,10 @@ class MCPToolCallRequest(BaseModel):
 
 
 # ---------------------------------------------------------
-# Health Check
-# ---------------------------------------------------------
-
-@app.get("/health")
-def health():
-    return {
-        "status": "ok",
-        "service": "OpsPilot API",
-    }
-
-
-# ---------------------------------------------------------
 # Upload Incident Report — Temporary Upload Test
 # ---------------------------------------------------------
 
-@app.post("/api/investigate")
+@router.post("/api/investigate")
 async def investigate(
     service: str = Form(
         default="payment-api",
@@ -149,11 +109,13 @@ async def investigate(
     file: UploadFile = File(...),
 ):
     """
-    Temporary upload test.
+    Receives an incident report and returns its metadata.
 
-    Receives the file and returns its metadata.
-    Investigation and report parsing are intentionally
-    not performed in this stage.
+    This is a temporary upload-test endpoint. It does not
+    perform an incident investigation.
+
+    The actual incident investigation endpoint is:
+    POST /incidents/investigate
     """
 
     try:
@@ -222,7 +184,7 @@ async def investigate(
 # Metrics
 # ---------------------------------------------------------
 
-@app.get("/api/metrics/{service}")
+@router.get("/api/metrics/{service}")
 def metrics(service: str):
     try:
         return get_service_metrics(service)
@@ -239,7 +201,7 @@ def metrics(service: str):
 # Runbook Search
 # ---------------------------------------------------------
 
-@app.post("/api/runbook")
+@router.post("/api/runbook")
 def runbook(request: RunbookRequest):
     try:
         return search_runbook(
@@ -260,7 +222,7 @@ def runbook(request: RunbookRequest):
 # MCP Tool Calls
 # ---------------------------------------------------------
 
-@app.post("/api/mcp/call")
+@router.post("/api/mcp/call")
 async def call_mcp_tool(request: MCPToolCallRequest):
     if request.tool not in ALLOWED_MCP_TOOLS:
         raise HTTPException(
@@ -329,7 +291,7 @@ async def call_mcp_tool(request: MCPToolCallRequest):
 # Chat
 # ---------------------------------------------------------
 
-@app.post("/api/chat")
+@router.post("/api/chat")
 def chat(request: ChatRequest):
     api_key = (
         os.getenv("GOOGLE_API_KEY")
