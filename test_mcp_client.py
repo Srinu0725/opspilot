@@ -3,7 +3,7 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 async def main():
     # url = "http://127.0.0.1:8002/mcp"
-    url = "https://opspilot-odgn.onrender.com/mcp"
+    url = "https://opspilot-api-opbm.onrender.com/mcp",
 
     async with streamablehttp_client(url) as (
         read_stream,

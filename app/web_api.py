@@ -27,7 +27,7 @@ logger = logging.getLogger("opspilot.api")
 
 MCP_SERVER_URL = os.getenv(
     "OPSPILOT_MCP_URL",
-    "https://opspilot-odgn.onrender.com/mcp",
+    "https://opspilot-api-opbm.onrender.com/mcp",
 )
 
 ALLOWED_MCP_TOOLS = {
