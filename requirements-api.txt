@@ -6,7 +6,7 @@ python-dotenv==1.2.3
 python-multipart==0.0.32
 mcp==1.30.0
 google-genai==2.23.0
-SQLAlchemy
+SQLAlchemy[asyncio]
 alembic
 asyncpg
 aiosqlite==0.22.1
